@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Details</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Load Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom styles for scrollable area */
+        .scrollable {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-primary text-white text-center py-3">
+        <h1>Patient Details</h1>
+    </header>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Health App</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'health_report_list' %}">Health Reports</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'patient_detail' %}">Patient Details</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Form to input patient ID -->
+        <form method="post" class="mb-3">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="patient_id">Enter Patient ID:</label>
+                <input type="text" id="patient_id" name="patient_id" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+
+        {% if patient_info %}
+            <h2>Patient: {{ patient_info.patient_name }} (ID: {{ patient_info.patient_id }})</h2>
+            <p><strong>Height:</strong> {{ patient_info.height }} cm</p>
+            <p><strong>Weight:</strong> {{ patient_info.weight }} kg</p>
+            <p><strong>Doctor:</strong> {{ patient_info.doctor_name }} (ID: {{ patient_info.doctor_id }})</p>
+            <p><strong>Hospital:</strong> {{ patient_info.hospital_name }} (ID: {{ patient_info.hospital_id }})</p>
+
+            <!-- Visualization Section -->
+            <h3>Health Visualizations</h3>
+
+            <!-- Heart Rate Chart -->
+            <h4>Heart Rate Over Time</h4>
+            <canvas id="heartRateChart"></canvas>
+
+            <!-- Cholesterol Level Chart -->
+            <h4>Cholesterol Level Over Time</h4>
+            <canvas id="cholesterolChart"></canvas>
+
+            <!-- Platelet Count Chart -->
+            <h4>Platelet Count Over Time</h4>
+            <canvas id="plateletChart"></canvas>
+
+            <!-- Eyesight Chart -->
+            <h4>Eyesight Over Time</h4>
+            <canvas id="eyesightChart"></canvas>
+
+            <!-- Script to render charts using Chart.js -->
+            <script>
+                // Data for charts (replace with Django context variables)
+                const labels = {{ months|safe }};  // E.g., ["Jan", "Feb", "Mar", ..., "Dec"]
+
+                const heartRateData = {{ heart_rate_data|safe }};  // E.g., [72, 70, 75, ...]
+                const cholesterolData = {{ cholesterol_data|safe }};  // E.g., [180, 175, 185, ...]
+                const plateletData = {{ platelet_count_data|safe }};  // E.g., [250000, 240000, ...]
+                const eyesightData = {{ eyesight_data|safe }};  // E.g., [1.5, 1.4, 1.6, ...]
+
+                // Heart Rate Chart
+                const heartRateCtx = document.getElementById('heartRateChart').getContext('2d');
+                const heartRateChart = new Chart(heartRateCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Heart Rate (bpm)',
+                            data: heartRateData,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 2,
+                            fill: false,
+                        }]
+                    }
+                });
+
+                // Cholesterol Level Chart
+                const cholesterolCtx = document.getElementById('cholesterolChart').getContext('2d');
+                const cholesterolChart = new Chart(cholesterolCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Cholesterol Level (mg/dL)',
+                            data: cholesterolData,
+                            borderColor: 'rgba(153, 102, 255, 1)',
+                            borderWidth: 2,
+                            fill: false,
+                        }]
+                    }
+                });
+
+                // Platelet Count Chart
+                const plateletCtx = document.getElementById('plateletChart').getContext('2d');
+                const plateletChart = new Chart(plateletCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Platelet Count (/µL)',
+                            data: plateletData,
+                            borderColor: 'rgba(255, 159, 64, 1)',
+                            borderWidth: 2,
+                            fill: false,
+                        }]
+                    }
+                });
+
+                // Eyesight Chart
+                const eyesightCtx = document.getElementById('eyesightChart').getContext('2d');
+                const eyesightChart = new Chart(eyesightCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Eyesight (diopters)',
+                            data: eyesightData,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 2,
+                            fill: false,
+                        }]
+                    }
+                });
+            </script>
+        {% else %}
+            <h3>Please enter a patient ID to see details.</h3>
+        {% endif %}
+    </div>
+
+    <footer class="bg-light text-center py-3">
+        <p>&copy; 2024 Your Company Name. All Rights Reserved.</p>
+        <p><a href="#" class="text-primary">Privacy Policy</a> | <a href="#" class="text-primary">Terms of Service</a></p>
+    </footer>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
